@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace UniGet
@@ -37,7 +37,7 @@ namespace UniGet
             return Tuple.Create(packagePath, ver);
         }
 
-        public static void ExtractPackage(
+        public static string ExtractPackage(
             string packageId, string version, string tarketFrameworkMoniker, string outputDir)
         {
             var cacheRootPath = GetPackageCacheRoot();
@@ -47,11 +47,18 @@ namespace UniGet
                 throw new InvalidOperationException("Cannot find the package: " + packagePath);
 
             var libPath = Path.Combine(packagePath, "lib", tarketFrameworkMoniker);
-            if (Directory.Exists(libPath) == false)
-                throw new InvalidOperationException("Cannot find lib directory: " + libPath);
-
             var target = $"Assets/UnityPackages/{packageId}";
             var targetDir = Path.Combine(outputDir, target);
+            if (Directory.Exists(libPath) == false)
+            {
+                if (TryExtractAnalyzersPackage(packageId, version, outputDir, out targetDir))
+                {
+                    return targetDir;
+                }
+
+                throw new InvalidOperationException("Cannot find lib directory: " + libPath);
+            }
+
             Directory.CreateDirectory(targetDir);
             File.WriteAllBytes(targetDir + ".meta",
                                Packer.GenerateMeta(".", target).Item2);
@@ -77,6 +84,43 @@ namespace UniGet
                                        Packer.GenerateMeta(file, target + "/" + fileName + ".mdb").Item2);
                 }
             }
+
+            return targetDir;
+        }
+
+        private static bool TryExtractAnalyzersPackage(string packageId, string version, string outputDir, out string targetDir)
+        {
+            var cacheRootPath = GetPackageCacheRoot();
+            var packagePath = Path.Combine(cacheRootPath, packageId + "." + version);
+            var target = $"Assets/UnityPackages/Analyzers/{packageId}";
+            targetDir = Path.Combine(outputDir, target);
+            if (Directory.Exists(packagePath) == false)
+            {
+                throw new InvalidOperationException("Cannot find the package: " + packagePath);
+            }
+
+            Directory.CreateDirectory(targetDir);
+            File.WriteAllBytes(targetDir + ".meta",
+                Packer.GenerateMeta(".", target).Item2);
+
+            Packer.GenerateMeta(".", target);
+
+            var analyzerPath = Path.Combine(packagePath, "analyzers", "dotnet", "cs");
+            if (!Directory.Exists(analyzerPath))
+            {
+                return false;
+            }
+
+            foreach (var file in Directory.GetFiles(analyzerPath, "*.dll"))
+            {
+                var fileName = Path.GetFileName(file);
+
+                File.Copy(file, Path.Combine(targetDir, fileName), true);
+                File.WriteAllBytes(Path.Combine(targetDir, fileName) + ".meta",
+                    Packer.GenerateAnalyzerMeta(file, target + "/" + fileName).Item2);
+            }
+
+            return true;
         }
     }
 }

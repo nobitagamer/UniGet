@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -219,19 +219,55 @@ namespace UniGet
                             })));
                 }
             }
-            else
+
+            return Tuple.Create(
+                guid,
+                Encoding.UTF8.GetBytes(string.Join("\n", new[]
+                {
+                    "fileFormatVersion: 2",
+                    "guid: " + guid,
+                    "folderAsset: yes",
+                    "DefaultImporter:",
+                    "  userData: ",
+                })));
+        }
+
+        public static Tuple<string, byte[]> GenerateAnalyzerMeta(string sourcePath, string targetPath)
+        {
+            var guid = GenerateGuid(targetPath);
+            if (File.Exists(sourcePath))
             {
-                return Tuple.Create(
-                    guid,
-                    Encoding.UTF8.GetBytes(string.Join("\n", new[]
-                    {
-                        "fileFormatVersion: 2",
-                        "guid: " + guid,
-                        "folderAsset: yes",
-                        "DefaultImporter:",
-                        "  userData: ",
-                    })));
+                        return Tuple.Create(
+                            guid,
+                            Encoding.UTF8.GetBytes(string.Join("\n", new[]
+                            {
+                                "fileFormatVersion: 2",
+                                "guid: " + guid,
+                                "PluginImporter:",
+                                "  serializedVersion: 2",
+                                "  iconMap: {}",
+                                "  executionOrder: {}",
+                                "  isExplicitlyReferenced: 1",
+                                "  platformData:",
+                                "  - first:",
+                                "      '': first",
+                                "    second:",
+                                "      enabled: 0",
+                                "      settings: {}",
+                                "  userData:"
+                            })));
             }
+
+            return Tuple.Create(
+                guid,
+                Encoding.UTF8.GetBytes(string.Join("\n", new[]
+                {
+                    "fileFormatVersion: 2",
+                    "guid: " + guid,
+                    "folderAsset: yes",
+                    "DefaultImporter:",
+                    "  userData: ",
+                })));
         }
 
         private static string GenerateGuid(string path)

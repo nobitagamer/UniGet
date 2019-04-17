@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -199,20 +199,23 @@ namespace UniGet
             else
             {
                 // apply package
-
-                NugetPackage.ExtractPackage(projectId, packageVersion.ToString(),
+                var outputDir = NugetPackage.ExtractPackage(projectId, packageVersion.ToString(),
                                             nugetTargetFrameworkMoniker, context.OutputDir);
 
                 // create proxy project file
 
-                var outputDir = Path.Combine(context.OutputDir, $"Assets/UnityPackages/{projectId}");
+                // var outputDir = Path.Combine(context.OutputDir, $"Assets/UnityPackages/{projectId}");
                 var projectAssetPath = $"Assets/UnityPackages/{projectId}.unitypackage.json";
                 var projectFile = Path.Combine(context.OutputDir, projectAssetPath);
                 var p = new Project { Id = projectId, Version = packageVersion.ToString() };
                 p.Description = $"Nuget package (TFM:{nugetTargetFrameworkMoniker})";
-                p.Files = Directory.GetFiles(outputDir, "*")
-                                   .Where(f => Path.GetExtension(f).ToLower() != ".meta")
-                                   .Select(f => JToken.FromObject(f.Substring(outputDir.Length + 1).Replace("\\", "/"))).ToList();
+                if (Directory.Exists(outputDir))
+                {
+                    p.Files = Directory.GetFiles(outputDir, "*")
+                        .Where(f => Path.GetExtension(f).ToLower() != ".meta")
+                        .Select(f => JToken.FromObject(f.Substring(outputDir.Length + 1).Replace("\\", "/"))).ToList();
+                }
+
                 var jsonSettings = new JsonSerializerSettings
                 {
                     DefaultValueHandling = DefaultValueHandling.Ignore,

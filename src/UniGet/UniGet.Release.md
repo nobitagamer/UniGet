@@ -1,3 +1,11 @@
+## 0.3.4 (Released 2019/04/17)
+
+* [Trieunk]: Fix pack duplicate .mdb files.
+
+## 0.3.4 (Released 2019/03/18)
+
+* [Trieunk]: Support extract Roslyn Analyzer packages.
+
 ## 0.3.3 (Released 2016/07/12)
 
 * Fix restore option parsing error

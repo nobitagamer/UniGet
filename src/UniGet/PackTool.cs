@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
@@ -167,7 +167,8 @@ namespace UniGet
                 var srcFile = f.Item1;
                 var dstFile = f.Item2.Replace("\\", "/");
 
-                if (Path.GetExtension(srcFile).ToLower() == ".meta")
+                string ext = Path.GetExtension(srcFile).ToLower();
+                if (ext == ".meta" || ext == ".mdb")
                     continue;
 
                 // add file
@@ -188,7 +189,7 @@ namespace UniGet
 
                 // if dll, add *.mdb. if not exist, generate one from pdb
 
-                if (Path.GetExtension(srcFile).ToLower() == ".dll")
+                if (ext == ".dll")
                 {
                     var mdbFilePath = srcFile + ".mdb";
 
