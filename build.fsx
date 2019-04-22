@@ -15,7 +15,7 @@ let solution =
 
 Target "Clean" <| fun _ -> cleanBin
 
-Target "AssemblyInfo" <| fun _ -> generateAssemblyInfoWithVersion solution (fun p -> "3.4.3")
+Target "AssemblyInfo" <| fun _ -> generateAssemblyInfoWithVersion solution (fun p -> "3.4.6")
 
 Target "Restore" <| fun _ -> restoreNugetPackages solution
 

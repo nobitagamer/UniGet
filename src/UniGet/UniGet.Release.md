@@ -1,4 +1,8 @@
-## 0.3.4 (Released 2019/04/17)
+## 0.3.6 (Released 2019/04/22)
+
+* [Trieunk]: Fix store correct file paths in *.unitypackage.json for Analyzer packages.
+
+## 0.3.5 (Released 2019/04/17)
 
 * [Trieunk]: Fix pack duplicate .mdb files.
 

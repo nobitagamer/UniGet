@@ -213,7 +213,7 @@ namespace UniGet
                 {
                     p.Files = Directory.GetFiles(outputDir, "*")
                         .Where(f => Path.GetExtension(f).ToLower() != ".meta")
-                        .Select(f => JToken.FromObject(f.Substring(outputDir.Length + 1).Replace("\\", "/"))).ToList();
+                        .Select(f => JToken.FromObject(f.Substring(context.OutputDir.Length + 1).Replace("\\", "/"))).ToList();
                 }
 
                 var jsonSettings = new JsonSerializerSettings
