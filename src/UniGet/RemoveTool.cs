@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -90,7 +90,7 @@ namespace UniGet
                     File.Delete(packageFile + ".meta");
             }
 
-            RemoveEmptyFolder(packageBaseDir);
+            RemoveEmptyFolder(options.ProjectDir);
 
             return 0;
         }

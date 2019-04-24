@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -49,9 +49,10 @@ namespace UniGet
             // read project in package and get file type information
 
             var fileMap = new Dictionary<string, Project.FileItem>();
+            var deleteFileMap = new Dictionary<string, Project.FileItem>();
 
             var projectFile = $"Assets/UnityPackages/{projectId}.unitypackage.json";
-            var projectFilePath = "";
+            string projectFilePath;
             if (files.TryGetValue(projectFile, out projectFilePath))
             {
                 var p = Project.Load(projectFilePath);
@@ -59,19 +60,29 @@ namespace UniGet
                 {
                     foreach (var fileValue in p.Files)
                     {
-                        if (fileValue is JObject)
+                        var fileItem = fileValue is JObject ? fileValue.ToObject<Project.FileItem>() : new Project.FileItem { Target = fileValue.ToString() };
+                        AddToFileMap(fileMap, fileItem);
+                    }
+                }
+
+                // Trieunk: compare with existing files list to delete removed files later.
+                var existingProjectFilePath = Path.Combine(outputDir, projectFile);
+                if (File.Exists(existingProjectFilePath))
+                {
+                    var existingProject = Project.Load(existingProjectFilePath);
+                    if (existingProject.Files != null)
+                    {
+                        foreach (var fileValue in existingProject.Files)
                         {
-                            var fileItem = fileValue.ToObject<Project.FileItem>();
-                            fileMap.Add(fileItem.Target, fileItem);
-                        }
-                        else
-                        {
-                            fileMap.Add(fileValue.ToString(), new Project.FileItem { Target = fileValue.ToString() });
+                            var fileItem = fileValue is JObject ? fileValue.ToObject<Project.FileItem>() : new Project.FileItem { Target = fileValue.ToString() };
+                            if (!fileMap.ContainsKey(fileItem.Target))
+                            {
+                                AddToFileMap(deleteFileMap, fileItem);
+                            }
                         }
                     }
                 }
             }
-
             var folderForAddedFile = new HashSet<string>();
             foreach (var file in files)
             {
@@ -107,14 +118,41 @@ namespace UniGet
             foreach (var folder in folderForAddedFile)
             {
                 string folderPath;
-                if (folders.TryGetValue(folder, out folderPath))
+                if (!folders.TryGetValue(folder, out folderPath))
                 {
-                    var destPath = Path.Combine(outputDir, folder);
-                    File.Copy(folderPath + ".meta", destPath + ".meta", true);
+                    continue;
+                }
+
+                var destPath = Path.Combine(outputDir, folder);
+                File.Copy(folderPath + ".meta", destPath + ".meta", true);
+            }
+
+            // Delete removed files
+            foreach (var fileItem in deleteFileMap)
+            {
+                var path = Path.Combine(outputDir, fileItem.Key);
+                if (File.Exists(path))
+                {
+                    Console.WriteLine($"Deleting file '{path}'...");
+                    File.Delete(path);
                 }
             }
 
             Directory.Delete(tempPath, true);
+        }
+
+        private static void AddToFileMap(IDictionary<string, Project.FileItem> fileMap, Project.FileItem fileItem)
+        {
+            var key = fileItem.Target;
+            if (fileMap.ContainsKey(key))
+            {
+                Console.WriteLine($"Replacing item '{key}' ({fileItem.Source})");
+                fileMap[key] = fileItem;
+            }
+            else
+            {
+                fileMap.Add(key, fileItem);
+            }
         }
 
         public static string CreateTemporaryDirectory()

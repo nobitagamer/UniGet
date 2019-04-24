@@ -1,3 +1,15 @@
+## 0.3.9 (Released 2019/04/24)
+
+* [Trieunk]: Auto delete removed files from packages if *.unitypackage.json is exists in target folder.
+
+## 0.3.8 (Released 2019/04/23)
+
+* [Trieunk]: Replace duplicate file with file from parent package.
+
+## 0.3.7 (Released 2019/04/22)
+
+* [Trieunk]: Remove empty folder start from project path instead of packages path.
+
 ## 0.3.6 (Released 2019/04/22)
 
 * [Trieunk]: Fix store correct file paths in *.unitypackage.json for Analyzer packages.
